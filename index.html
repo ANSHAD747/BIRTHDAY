@@ -160,6 +160,13 @@
 </head>
 <body>
   <canvas id="confetti" aria-hidden="true"></canvas>
+  
+  <!-- Background Music -->
+  <audio id="bgMusic" loop autoplay hidden>
+    <source src="./Nusrat.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
   <div class="container">
     <section class="card" role="region" aria-label="Birthday wishing card">
       <div class="glow" aria-hidden="true"></div>
@@ -173,6 +180,7 @@
           <button class="btn primary" id="celebrateBtn" title="Celebrate (confetti + balloons)">🎉 Celebrate</button>
           <button class="btn" id="fullscreenBtn" title="Toggle full screen">⛶ Fullscreen</button>
           <button class="btn success" id="shareBtn" title="Copy shareable link with your wish">🔗 Share</button>
+          <button class="btn" id="musicBtn" title="Play/Pause background music">🎵 Music</button>
         </div>
       </header>
 
@@ -181,13 +189,13 @@
           <h1 class="headline">Happy Birthday<span class="name" id="namePreview">Friend</span>! 🎂</h1>
           <p class="sub">Make it personal: type a name and a heartfelt message. Hit <strong>Celebrate</strong> to launch the party!</p>
 
-          <div class="inputs" aria-label="Customize your wish">
+          <div class="inputs">
             <div>
-              <label for="nameInput">Recipient name</label>
-              <input id="nameInput" placeholder="e.g., Tuhin, Aisha, Dad" maxlength="24" />
+              <label for="nameInput">Name</label>
+              <input id="nameInput" placeholder="Whose Birthday" maxlength="24" />
             </div>
             <div>
-              <label for="msgInput">Your message</label>
+              <label for="msgInput">Write your Wish</label>
               <textarea id="msgInput" placeholder="Wishing you a day filled with joy, laughter, and all your favorite things!" maxlength="240"></textarea>
             </div>
             <div class="actions">
@@ -199,7 +207,6 @@
 
         <div class="preview" id="preview" aria-live="polite">
           <div class="floating" id="balloonArea" aria-hidden="true"></div>
-
           <div class="cake" aria-hidden="true">
             <div class="plate"></div>
             <div class="layer bottom"></div>
@@ -208,29 +215,41 @@
             <div class="candle"></div>
             <div class="flame"></div>
           </div>
-
           <p class="wish" id="wishText">Wishing you a day as bright as your smile and a year as sweet as cake. May all your dreams take flight! 🥳✨</p>
         </div>
       </main>
 
       <footer>
-        <span>Tip: Add <code>?name=YourFriend&msg=Your%20message</code> to the URL and share.</span>
         <a class="linkish" href="#" id="copyWish">Copy wish text</a>
       </footer>
     </section>
   </div>
 
   <script>
-    // --- Helpers ---
     const $ = s => document.querySelector(s);
-    const urlParams = new URLSearchParams(location.search);
 
+    // --- Background Music ---
+    const bgMusic = $('#bgMusic');
+    const musicBtn = $('#musicBtn');
+    let isPlaying = true;
+    musicBtn.addEventListener('click', () => {
+      if (isPlaying) {
+        bgMusic.pause();
+        musicBtn.textContent = '🔇 Music';
+      } else {
+        bgMusic.play();
+        musicBtn.textContent = '🎵 Music';
+      }
+      isPlaying = !isPlaying;
+    });
+
+    // --- Inputs & Preview ---
+    const urlParams = new URLSearchParams(location.search);
     const nameInput = $('#nameInput');
     const msgInput = $('#msgInput');
     const namePreview = $('#namePreview');
     const wishText = $('#wishText');
 
-    // Initialize from URL params if present
     const startName = urlParams.get('name') || '';
     const startMsg = urlParams.get('msg') || '';
     if (startName) { nameInput.value = startName; namePreview.textContent = startName; }
@@ -298,7 +317,6 @@
           x: Math.random() * canvas.width,
           y: -20,
           size: 6 + Math.random() * 6,
-          angle: Math.random() * PI2,
           velX: (Math.random() - .5) * 3,
           velY: 2 + Math.random() * 4,
           rot: Math.random() * PI2,
@@ -311,7 +329,7 @@
     function confettiLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       confettiPieces.forEach((p) => {
-        p.x += p.velX; p.y += p.velY; p.rot += p.rotSpeed; p.velY *= 0.995; // slight drag
+        p.x += p.velX; p.y += p.velY; p.rot += p.rotSpeed;
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot);
@@ -354,13 +372,19 @@
       toast('Make a wish! ✨');
     });
 
-    // --- Tiny toast ---
+    // --- Toast ---
     function toast(text) {
       const t = document.createElement('div');
       t.textContent = text;
-      t.style.position = 'fixed'; t.style.left = '50%'; t.style.bottom = '24px'; t.style.transform = 'translateX(-50%)';
-      t.style.background = 'rgba(17,24,39,.9)'; t.style.border = '1px solid rgba(255,255,255,.15)'; t.style.color = 'white';
-      t.style.padding = '10px 14px'; t.style.borderRadius = '999px'; t.style.fontWeight = '700'; t.style.boxShadow = '0 10px 40px rgba(0,0,0,.4)';
+      t.style.position = 'fixed'; t.style.left = '50%'; t.style.bottom = '24px';
+      t.style.transform = 'translateX(-50%)';
+      t.style.background = 'rgba(17,24,39,.9)';
+      t.style.border = '1px solid rgba(255,255,255,.15)';
+      t.style.color = 'white';
+      t.style.padding = '10px 14px';
+      t.style.borderRadius = '999px';
+      t.style.fontWeight = '700';
+      t.style.boxShadow = '0 10px 40px rgba(0,0,0,.4)';
       t.style.zIndex = 60;
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 1800);
